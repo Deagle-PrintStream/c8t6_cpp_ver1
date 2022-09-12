@@ -20,7 +20,17 @@ typedef enum __direction_t{
 	dirNowhere=4,
 }direction_t;
 
-namespace tracerRelated{
+typedef enum __on_off_t{
+	off=0,
+	on=1,
+}on_off_t;
+
+namespace tracer_nsp{
+
+	typedef enum __hit_leave_t{
+		leave=0,
+		hit=1,
+	}hit_leave_t;
 
 	typedef enum __sensorOrder_t{
 		L2=0,
