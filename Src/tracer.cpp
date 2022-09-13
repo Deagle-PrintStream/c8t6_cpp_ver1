@@ -3,9 +3,40 @@
 #include "tracer.h"
 /* Exported macro ------------------------------------------------------------*/
 
+tracer_t tracer[4];
 
 /* Exported functions definens ---------------------------------------------*/
 
+
+/* Class construction & destruction functions defines ---------------------------------------------*/
+/*构造函数*/
+tracer_t::tracer_t()\
+	:valThrehold(valThreholdDefault),confidenceCoeMax(confidenceCoeMaxDefault)
+{
+	clearStatus();
+	clearValAverage();
+	clearValCache();
+
+}
+
+tracer_t::tracer_t(float *confCoeDefaultVal)\
+	:valThrehold(valThreholdDefault),confidenceCoeMax(confidenceCoeMaxDefault)
+{
+	clearStatus();
+	clearValAverage();
+	clearValCache();
+  updateConfCoe(confCoeDefaultVal);
+
+}
+
+
+/*默认解析函数*/
+tracer_t::~tracer_t()
+{
+	clearStatus();
+	clearValAverage();
+	clearValCache();
+}
 
 /* Class private functions defines ---------------------------------------------*/
 
@@ -42,6 +73,14 @@ void tracer_t::clearValCache(void){
       }
   }
   valCachePtr=0;
+}
+
+void tracer_t::clearValAverage(void){
+  for(uint8_t i=0;i<sensorCount;i++){
+    newSensorVal[i]=0;
+    valAverage[i]=0;
+    sensorVal[i]=0;
+  }
 }
 
 void tracer_t::getValAverage(void)
@@ -94,7 +133,6 @@ void tracer_t::updatePathStatus(void){
       leavePath[dirFront]=0;
     }
     if(sensorVal[R2]==1){
-      /*此处有奇怪的warning*/
       leavePath[dirLeft]=1;
     }else{
       leavePath[dirLeft]=0;
@@ -120,7 +158,7 @@ void tracer_t::clearStatus(void)
 
 /* Class public functions defines ---------------------------------------------*/
 
-void tracer_t::detectMode(status_t newStatus=2)
+void tracer_t::detectMode(status_t newStatus)
 {
   /*默认传入参数为2，即为切换当前模式*/
   if(newStatus>=2){
@@ -131,7 +169,7 @@ void tracer_t::detectMode(status_t newStatus=2)
   clearValCache();
 }
 
-void tracer_t::calcStatusMode(status_t newStatus=2)
+void tracer_t::calcStatusMode(status_t newStatus)
 {
   /*默认传入参数为2，即为切换当前模式*/
   if(newStatus>=2){
@@ -172,9 +210,17 @@ status_t tracer_t::getPathStatus(hit_leave_t newStatus, direction_t newDir)const
     return (status_t)(-1);
 
   if(newStatus==leave){
-    return leavePath[newDir];
+    if(newDir==dirAll){
+      return leavePath[dirFront]+leavePath[dirRight]+leavePath[dirLeft];
+    }else{
+      return leavePath[newDir];
+    }
   }else if(newStatus==hit){
-    return hitPath[newDir];
+    if(newDir==dirAll){
+      return hitPath[dirFront]+hitPath[dirRight]+hitPath[dirLeft];
+    }else{
+      return hitPath[newDir];
+    }
   }
   return (status_t)(-1);
 }
@@ -189,6 +235,39 @@ status_t leavingPath(tracer_t &tracer,direction_t newDir){
   return tracer.getPathStatus(leave,newDir);
 }
 
+__DEBUG void tracer_t::printNewSensorVal(void)const{
+  uint8_t newMsg[sensorCount]={0};
+  for(uint8_t i=0;i<sensorCount;i++){
+    newMsg[i]='0'+newSensorVal[i];
+  }
+  printMsg(newMsg,sensorCount);
+}
+
+__DEBUG void tracer_t::printSensorVal(void)const{
+  uint8_t newMsg[sensorCount]={0};
+  for(uint8_t i=0;i<sensorCount;i++){
+    newMsg[i]='0'+sensorVal[i];
+  }
+  printMsg(newMsg,sensorCount);
+}
+
+__DEBUG void tracer_t::printStatus(void)const{
+//想一下怎么方便的输出所有类型的撞线flag
+  if(getPathStatus(tracer_nsp::hit,dirAll)){
+    uint8_t newMsg[]="hit\t";
+    printMsg(newMsg);
+    return;
+  }
+  if(getPathStatus(tracer_nsp::leave,dirAll)){
+    uint8_t newMsg[]="leave\t";
+    printMsg(newMsg);
+    return;
+  }
+  if(onPath==1){
+    uint8_t newMsg[]="on path\t";
+    printMsg(newMsg);
+  }
+}
 
 /* Private functions defines ---------------------------------------------*/
 
