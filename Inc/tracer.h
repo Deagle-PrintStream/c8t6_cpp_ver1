@@ -19,15 +19,12 @@ static const uint8_t valCacheMaxDefault=5;
 static const float valThreholdDefault=0.6;
 static const float confidenceCoeMaxDefault=1;
 
-/* Exported macro ------------------------------------------------------------*/
-
-
 /* Exported functions prototypes ---------------------------------------------*/
 
 
 /* Private defines -----------------------------------------------------------*/
 
-#define TEMPLATE_API
+#define __TRACER
 
 /* Class defines -----------------------------------------------------------*/
 
@@ -50,10 +47,9 @@ private:
 	/*传感器数值是否超过阈值，若是则视为在黑线上*/
 	status_t sensorVal[sensorCount];
 	/*每一个传感器的置信系数，目前设置为0/1，即可信或者不可信，
-	根据初始状态自动进行设置，下一步可以根据行进过程中动态调节其置信比*/
+	根据初始状态进行设置，下一步可以根据行进过程中动态调节其置信比*/
 	float confidenceCoe[sensorCount];
-
-	/*是否开启检测*/
+	/*是否开启传感器检测*/
 	status_t detectOn=0;
 	/*是否开启路径检测*/
 	status_t calcStatus=0;
@@ -64,11 +60,12 @@ private:
 	void updateValCache(void);
 	/*清空缓存区*/
 	void clearValCache(void);
+	/*清空传感器数值平均值和二值化结果*/
+	void clearValAverage(void);
 	/*取得近一段时间内的平均值*/
 	void getValAverage(void);
 	/*计算是否超过了阈值，即平均时间内的二值化*/
 	void updateSensorVal(void);
-
 	/*更新tracer的路径检测数值，包括onPath,hitPath,leavePath*/
 	void updatePathStatus(void);
 	/*重置tracer统计的路线状况*/
@@ -83,59 +80,36 @@ public:
 	/*该tracer是否刚从线上离开到线外,三个方向离线*/
 	status_t leavePath[3];
 
+	/*构造函数*/
+	tracer_t();
 	tracer_t(float *confCoeDefaultVal);
+	/*默认解析函数*/
 	~tracer_t();
 	/*开启或关闭检测*/
-	void detectMode(status_t newStatus);
+	void detectMode(status_t newStatus=2);
 	/*开启或关闭撞线计算*/
-	void calcStatusMode(status_t newStatus);
+	void calcStatusMode(status_t newStatus=2);
 	/*更新置信系数，即过程中是否存在传感器失灵的情况*/
 	void updateConfCoe(float *newConfCoeVal);
 	/*更新tracer所有数值*/
 	void updateData(void);
 	/*update()的另一个形式*/
 	friend void updateTracer(tracer_t &newTracer);
-	/*取得撞线计算数值*/
-	status_t getPathStatus(hit_leave_t newStatus, direction_t newDir)const;
+	/*取得撞线或站离线计算数值*/
+	status_t getPathStatus(hit_leave_t newStatus, direction_t newDir=dirAll)const;
 	/*getPath()的另两个形式*/
 	friend status_t hittingPath(tracer_t &tracer,direction_t newDir);
 	friend status_t leavingPath(tracer_t &tracer,direction_t newDir);
+	/*调试用函数，输出相关变量*/
+	__DEBUG void printNewSensorVal(void)const;
+	__DEBUG void printSensorVal(void)const;
+	__DEBUG void printStatus(void)const;
 
 };
 
-/* Class construction & destruction functions defines ---------------------------------------------*/
-tracer_t::tracer_t(float *confCoeDefaultVal=nullptr)\
-	:valThrehold(valThreholdDefault),confidenceCoeMax(confidenceCoeMaxDefault)
-{
-	for(uint8_t i=0;i<sensorCount;i++){
-		newSensorVal[i]=0;
-		sensorVal[i]=0;
-		for(uint8_t j=0;i<valCacheMaxDefault;j++)
-			valCache[i][j]=0;
+/* Exported macro ------------------------------------------------------------*/
 
-	}
-	if(confCoeDefaultVal!=nullptr){
-		for(uint8_t i=0;i<sensorCount;i++){
-			confidenceCoe[i]=confCoeDefaultVal[i];
-		}
-	}else{
-		for(uint8_t i=0;i<sensorCount;i++){
-			confidenceCoe[i]=1.0;
-		}
-	}
-	valCachePtr=0;
-
-	onPath=0;
-	for(uint8_t i=0;i<3;i++){
-		hitPath[i]=0;
-		leavePath[i]=0;
-	}
-
-}
-
-tracer_t::~tracer_t()
-{
-}
+extern tracer_t tracer[];
 
 #ifdef __cplusplus
 }
