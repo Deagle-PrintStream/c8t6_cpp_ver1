@@ -17,7 +17,7 @@ extern "C" {
 static const uint8_t sensorCount=5;
 static const uint8_t valCacheMaxDefault=5;
 static const float valThreholdDefault=0.6;
-static const float confidenceCoeMaxDefault=1;
+static const float confidenceCoeMaxDefault=1;/*old version of class tracer_t required*/
 
 /* Exported functions prototypes ---------------------------------------------*/
 
@@ -72,6 +72,8 @@ public:
 	void setConfCoe(float newCoe=1);
 	/*清空所有数值*/
 	void clearData(void);
+	/*取得最近一次的检测值*/
+	__DEBUG status_t getNewVal(void)const;
 };
 
 class tracer_t_new{
@@ -106,21 +108,31 @@ public:
 
 	tracer_t_new();
 	~tracer_t_new();
+
 	/*更新tracer所有数值*/
 	void updateData(void);	
+	/*update()的另一个形式*/
+	friend void updateTracer(tracer_t_new &newTracer);
 	/*开启或关闭检测*/
 	void detectMode(status_t newStatus=2);
+
 	/*开启或关闭撞线计算*/
 	void calcStatusMode(status_t newStatus=2);
+
 	/*更新置信系数，即过程中是否存在传感器失灵的情况*/
 	void setConfCoe(uint8_t sensorOrder,float newConfCoeVal);
 	/*取得撞线或站离线计算数值*/
 	status_t getPathStatus(hit_leave_t newStatus, direction_t newDir=dirAll)const;
+	/*getPath()的另两个形式*/
+	friend status_t hittingPath(tracer_t_new &tracer,direction_t newDir);
+	friend status_t leavingPath(tracer_t_new &tracer,direction_t newDir);
 	/*清空所有数值*/
 	void clearData(void);
+	/*调试用函数，输出相关变量*/
+	__DEBUG void printNewSensorVal(void)const;
+	__DEBUG void printSensorVal(void)const;
+	__DEBUG void printStatus(void)const;
 };
-
-
 
 class tracer_t{
 private:
@@ -165,6 +177,7 @@ private:
 	
 public:
 	/*根据valCache计算得到的若干关于该tracer的统计值*/
+	/*TODO:是否应该把这些测算量移动到private内?*/
 	/*该tracer是否在线上*/
 	status_t onPath;
 	/*该tracer是否刚从线外进入到线上,三个方向撞线*/
@@ -186,12 +199,12 @@ public:
 	/*更新tracer所有数值*/
 	void updateData(void);
 	/*update()的另一个形式*/
-	friend void updateTracer(tracer_t &newTracer);
+	friend void updateTracer_old(tracer_t &newTracer);
 	/*取得撞线或站离线计算数值*/
 	status_t getPathStatus(hit_leave_t newStatus, direction_t newDir=dirAll)const;
 	/*getPath()的另两个形式*/
-	friend status_t hittingPath(tracer_t &tracer,direction_t newDir);
-	friend status_t leavingPath(tracer_t &tracer,direction_t newDir);
+	friend status_t hittingPath_old(tracer_t &tracer,direction_t newDir);
+	friend status_t leavingPath_old(tracer_t &tracer,direction_t newDir);
 	/*调试用函数，输出相关变量*/
 	__DEBUG void printNewSensorVal(void)const;
 	__DEBUG void printSensorVal(void)const;
@@ -201,7 +214,7 @@ public:
 
 /* Exported macro ------------------------------------------------------------*/
 
-extern tracer_t tracer[];
+extern tracer_t_new tracer[];
 
 #ifdef __cplusplus
 }

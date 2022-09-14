@@ -3,7 +3,7 @@
 #define __PATH_H
 /* Private includes ----------------------------------------------------------*/
 #include "common.h"
-
+#include "tracer.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,9 +47,6 @@ enum keyNode_t{
 
 /* Exported constants ------------------------------------------------------------*/
 
-/* Exported macro ------------------------------------------------------------*/
-
-
 /* Exported functions prototypes ---------------------------------------------*/
 
 
@@ -57,38 +54,60 @@ enum keyNode_t{
 
 /* Class defines -----------------------------------------------------------*/
 
+class selector_t{
+private:
+  /*当前选择器返回值对应的的tracer*/
+  uint8_t currDir;
+
+  /*根据当前方向设置gpio输出*/
+  void updateOutput(void)const;
+public:
+  selector_t();
+  ~selector_t();
+
+  /*手动设置当前选择器对应返回值*/
+  void setCurrDir(direction_t newDir=dirFront);
+  /*周期性更新返回值,时钟周期中断里直接调用该函数即可*/
+  direction_t update(void);
+  friend void updateSelector(selector_t &selector);
+
+};
+
 class patrol_t{
 private:
+  /*当前平凡节点，即直线或者右转弯等*/
 	plainNode_t currPlainNode;
+  /*当前关键节点，如起跑线或者取壶点等*/
 	keyNode_t preKeyNode;
-
+  /*是否开启检测*/
 	status_t updateOn;
-
-
+  /**/
+  /**/
+  /**/
+  /**/
 public:
 
 	patrol_t();
 	~patrol_t();
-
+  /*根据四个tracer的数值更新当前所在平凡节点类型*/
 	void updatePlainNode(void);
+  /*开启或者关闭节点检测*/
 	void switchMode(status_t newMode=tracer_nsp::off);
+  /*强制设置平凡检点类型*/
 	void setPlainNode(plainNode_t newPlainNode=nowhere);
-	void setKeyNode(keyNode_t newKeyNode=lostInNowhere);
+  /*强制设置关键检点类型*/
+	void setKeyNode(keyNode_t newKeyNode=startLine);
+  /*从preNode出发向newNode行进，整合了各个部分的运动方向*/
 	void headingFor(keyNode_t newKeyNode,uint32_t timeout=timeoutMax)const;
 
-
-
 };
-patrol_t::patrol_t(){
-	currPlainNode=nowhere;
-	preKeyNode=startLine;
-	updateOn=tracer_nsp::off;
-}
 
-patrol_t::~patrol_t(){
-	currPlainNode=nowhere;
-	preKeyNode=startLine;
-}
+
+/* Exported macro ------------------------------------------------------------*/
+
+extern selector_t tracerSelector;
+extern patrol_t patrol;
+
 
 #define __PATH
 

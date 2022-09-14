@@ -15,7 +15,7 @@ static const uint32_t timeoutDefault=0x00ff;
 static const uint32_t timeoutMax=0x0ffffffff;
 static const uint8_t speedHigh=100;
 static const uint8_t speedLow=10;
-
+static const uint8_t directionCount=4;/*这个世界有四个方向*/
 
 
 
@@ -59,12 +59,15 @@ namespace tracer_nsp{
 
 /* Exported macro ------------------------------------------------------------*/
 
+extern UART_HandleTypeDef huart1;
 
 /* Exported functions prototypes ---------------------------------------------*/
-extern UART_HandleTypeDef huart1;
+
 /*自定义的调试输出函数，不能像printf一样输出更多类型的数值*/
 extern HAL_StatusTypeDef printMsg(uint8_t *newMsg,uint8_t msgSize=msgSizeDefault,\
 								UART_HandleTypeDef printUart=huart1,uint32_t timeout=timeoutDefault);
+/*延迟函数，实现微秒级别的延迟功能,或许需要一些修饰符，例如__STATIC_FORCEINLINE*/
+extern void Delay_us(uint16_t us);
 
 /* Private defines -----------------------------------------------------------*/
 
