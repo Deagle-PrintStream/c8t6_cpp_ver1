@@ -14,14 +14,12 @@ tracer_t_new tracer[directionCount];
 
 
 /*sensor_t construction &destruction func*/
-sensor_t::sensor_t(float newCoe):valThrehold(valThreholdDefault)
-{
+sensor_t::sensor_t(float newCoe):valThrehold(valThreholdDefault){
 	clearData();
 	setConfCoe(newCoe);
 }
 
-sensor_t::~sensor_t()
-{
+sensor_t::~sensor_t(){
 	clearData();
 }
 
@@ -83,6 +81,11 @@ void sensor_t::clearData(void){
   clearCache();
 }
 
+__DEBUG status_t sensor_t::getNewVal(void)const{
+  return newSensorVal;
+}
+
+
 /*tracer_t construction &destruction func*/
 
 tracer_t_new::tracer_t_new(){
@@ -96,7 +99,11 @@ tracer_t_new::~tracer_t_new(){
 /*tracer_t private func*/
 
 status_t tracer_t_new::sensorVal(uint8_t order)const{
-  return sensor[order].getValBinary();
+  if(order<sensorCount){
+    return sensor[order].getValBinary();
+  }else{
+    return (status_t)(-1);
+  }
 }
 
 void tracer_t_new::updateSensorVal(void){
@@ -105,7 +112,7 @@ void tracer_t_new::updateSensorVal(void){
   using namespace tracer_nsp;
   sensor[L2].updateData(PORT(0),PIN(0));
   sensor[L1].updateData(PORT(1),PIN(1));
-  sensor[M].updateData(PORT(2),PIN(2));
+  sensor[M ].updateData(PORT(2),PIN(2));
   sensor[R1].updateData(PORT(3),PIN(3));
   sensor[R2].updateData(PORT(4),PIN(4));
 
@@ -117,8 +124,7 @@ void tracer_t_new::updatePathStatus(void){
   using namespace tracer_nsp;
 
   status_t preOnPath=onPath;
-  if(sensorVal(R1)+sensorVal(M)+sensorVal(L1)==3){
-    
+  if(sensorVal(R1)+sensorVal(M)+sensorVal(L1)==3){    
     onPath=1;
   }else{
     onPath=0;
@@ -186,6 +192,10 @@ void tracer_t_new::updateData(void){
 
 }
 
+void updateTracer(tracer_t_new &newTracer){
+  newTracer.updateData();
+}
+
 void tracer_t_new::detectMode(status_t newStatus){
   /*默认传入参数为2，即为切换当前模式*/
   if(newStatus>=2){
@@ -234,24 +244,64 @@ status_t tracer_t_new::getPathStatus(hit_leave_t newStatus, direction_t newDir)c
   return (status_t)(-1);
 }
 
+status_t hittingPath(tracer_t_new &tracer,direction_t newDir){
+  using namespace tracer_nsp;
+  return tracer.getPathStatus(hit,newDir);
+}
+
+status_t leavingPath(tracer_t_new &tracer,direction_t newDir){
+  using namespace tracer_nsp;
+  return tracer.getPathStatus(leave,newDir);
+}
+
 void tracer_t_new::clearData(void){
   clearSensorVal();
   clearStatus();
 }
 
+__DEBUG void tracer_t_new::printNewSensorVal(void)const{
+  uint8_t newMsg[sensorCount]={0};
+  for(uint8_t i=0;i<sensorCount;i++){
+    newMsg[i]='0'+sensor[i].getNewVal();
+  }
+  printMsg(newMsg,sensorCount);
+}
+
+__DEBUG void tracer_t_new::printSensorVal(void)const{
+  uint8_t newMsg[sensorCount]={0};
+  for(uint8_t i=0;i<sensorCount;i++){
+    newMsg[i]='0'+sensorVal(i);
+  }
+  printMsg(newMsg,sensorCount);
+}
+
+__DEBUG void tracer_t_new::printStatus(void)const{
+//想一下怎么方便的输出所有类型的撞线flag
+  if(getPathStatus(tracer_nsp::hit,dirAll)){
+    uint8_t newMsg[]="hit\t";
+    printMsg(newMsg);
+    return;
+  }
+  if(getPathStatus(tracer_nsp::leave,dirAll)){
+    uint8_t newMsg[]="leave\t";
+    printMsg(newMsg);
+    return;
+  }
+  if(onPath==1){
+    uint8_t newMsg[]="on path\t";
+    printMsg(newMsg);
+  }
+}
 
 /*构造函数*/
-tracer_t::tracer_t()\
-	:valThrehold(valThreholdDefault),confidenceCoeMax(confidenceCoeMaxDefault)
-{
+tracer_t::tracer_t():valThrehold(valThreholdDefault),confidenceCoeMax(confidenceCoeMaxDefault){
 	clearStatus();
 	clearValAverage();
 	clearValCache();
 
 }
 
-tracer_t::tracer_t(float *confCoeDefaultVal)\
-	:valThrehold(valThreholdDefault),confidenceCoeMax(confidenceCoeMaxDefault)
+tracer_t::tracer_t(float *confCoeDefaultVal):valThrehold(valThreholdDefault),confidenceCoeMax(confidenceCoeMaxDefault)
 {
 	clearStatus();
 	clearValAverage();
@@ -430,7 +480,7 @@ void tracer_t::updateData(void){
   }  
 }
 
-void updateTracer(tracer_t &newTracer){
+void updateTracer_old(tracer_t &newTracer){
   newTracer.updateData();
 }
 
@@ -456,12 +506,12 @@ status_t tracer_t::getPathStatus(hit_leave_t newStatus, direction_t newDir)const
   return (status_t)(-1);
 }
 
-status_t hittingPath(tracer_t &tracer,direction_t newDir){
+status_t hittingPath_old(tracer_t &tracer,direction_t newDir){
   using namespace tracer_nsp;
   return tracer.getPathStatus(hit,newDir);
 }
 
-status_t leavingPath(tracer_t &tracer,direction_t newDir){
+status_t leavingPath_old(tracer_t &tracer,direction_t newDir){
   using namespace tracer_nsp;
   return tracer.getPathStatus(leave,newDir);
 }
