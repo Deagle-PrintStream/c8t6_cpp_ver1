@@ -17,7 +17,7 @@ extern "C" {
 static const uint8_t sensorCount=5;
 static const uint8_t valCacheMaxDefault=5;
 static const float valThreholdDefault=0.6;
-static const float confidenceCoeMaxDefault=1;
+static const float confidenceCoeMaxDefault=1;/*old version of class tracer_t required*/
 
 /* Exported functions prototypes ---------------------------------------------*/
 
@@ -29,6 +29,110 @@ static const float confidenceCoeMaxDefault=1;
 /* Class defines -----------------------------------------------------------*/
 
 using namespace tracer_nsp;
+
+class sensor_t
+{
+private:
+	const float valThrehold;
+
+	/*检测得到的新的二值*/
+	status_t newSensorVal;
+	/*历史数值缓存区，为循环队列*/
+	status_t valCache[valCacheMaxDefault];
+	/*缓存区指针*/
+	uint8_t cachePtr;
+	/*历史平均值*/
+	float valAverage;
+	/*置信系数*/
+	float confidenceCoe;
+	/*返回的二值*/
+	status_t valBinary;
+
+	/*瞬时测得的传感器数值*/
+	void getNewVal(GPIO_TypeDef *gpioPort,uint16_t pin);
+	/*更新缓存区*/
+	void updateCache(void);
+	/*更新历史平均数值*/
+	void updateValAverage(void);
+	/*更新历史平均数值的二值化结果*/
+	void updateValBinary(void);
+	/*清空缓存区*/
+	void clearCache(void);
+
+
+public:
+	sensor_t(float newCoe=1);
+	~sensor_t();
+
+	/*更新所有数据*/
+	status_t updateData(GPIO_TypeDef *gpioPort,uint16_t pin);
+	/*取得二值化的数据*/
+	status_t getValBinary(void)const;
+	/*设置该传感器的置信系数*/
+	void setConfCoe(float newCoe=1);
+	/*清空所有数值*/
+	void clearData(void);
+	/*取得最近一次的检测值*/
+	__DEBUG status_t getNewVal(void)const;
+};
+
+class tracer_t_new{
+private:
+	sensor_t sensor[sensorCount];
+
+	/*是否开启传感器检测*/
+	status_t detectOn;
+	/*是否开启路径检测*/
+	status_t calcStatus;
+
+	/*取得指定传感器的二值结果*/
+	status_t sensorVal(uint8_t order)const;
+	/*更新传感器数值*/
+	void updateSensorVal(void);
+	/*更新tracer的路径检测数值，包括onPath,hitPath,leavePath*/
+	void updatePathStatus(void);
+	/*重置所有传感器历史数值*/
+	void clearSensorVal(void);
+	/*重置tracer统计的路线状况*/
+	void clearStatus(void);
+
+
+public:
+	/*该tracer是否在线上*/
+	status_t onPath;
+	/*该tracer是否刚从线外进入到线上,三个方向撞线*/
+	status_t hitPath[3];
+	/*该tracer是否刚从线上离开到线外,三个方向离线*/
+	status_t leavePath[3];
+
+
+	tracer_t_new();
+	~tracer_t_new();
+
+	/*更新tracer所有数值*/
+	void updateData(void);	
+	/*update()的另一个形式*/
+	friend void updateTracer(tracer_t_new &newTracer);
+	/*开启或关闭检测*/
+	void detectMode(status_t newStatus=2);
+
+	/*开启或关闭撞线计算*/
+	void calcStatusMode(status_t newStatus=2);
+
+	/*更新置信系数，即过程中是否存在传感器失灵的情况*/
+	void setConfCoe(uint8_t sensorOrder,float newConfCoeVal);
+	/*取得撞线或站离线计算数值*/
+	status_t getPathStatus(hit_leave_t newStatus, direction_t newDir=dirAll)const;
+	/*getPath()的另两个形式*/
+	friend status_t hittingPath(tracer_t_new &tracer,direction_t newDir);
+	friend status_t leavingPath(tracer_t_new &tracer,direction_t newDir);
+	/*清空所有数值*/
+	void clearData(void);
+	/*调试用函数，输出相关变量*/
+	__DEBUG void printNewSensorVal(void)const;
+	__DEBUG void printSensorVal(void)const;
+	__DEBUG void printStatus(void)const;
+};
 
 class tracer_t{
 private:
@@ -50,9 +154,9 @@ private:
 	根据初始状态进行设置，下一步可以根据行进过程中动态调节其置信比*/
 	float confidenceCoe[sensorCount];
 	/*是否开启传感器检测*/
-	status_t detectOn=0;
+	status_t detectOn;
 	/*是否开启路径检测*/
-	status_t calcStatus=0;
+	status_t calcStatus;
 
 	/*读入新的传感器数值*/
 	void readNewSensorVal(void);
@@ -73,6 +177,7 @@ private:
 	
 public:
 	/*根据valCache计算得到的若干关于该tracer的统计值*/
+	/*TODO:是否应该把这些测算量移动到private内?*/
 	/*该tracer是否在线上*/
 	status_t onPath;
 	/*该tracer是否刚从线外进入到线上,三个方向撞线*/
@@ -94,12 +199,12 @@ public:
 	/*更新tracer所有数值*/
 	void updateData(void);
 	/*update()的另一个形式*/
-	friend void updateTracer(tracer_t &newTracer);
+	friend void updateTracer_old(tracer_t &newTracer);
 	/*取得撞线或站离线计算数值*/
 	status_t getPathStatus(hit_leave_t newStatus, direction_t newDir=dirAll)const;
 	/*getPath()的另两个形式*/
-	friend status_t hittingPath(tracer_t &tracer,direction_t newDir);
-	friend status_t leavingPath(tracer_t &tracer,direction_t newDir);
+	friend status_t hittingPath_old(tracer_t &tracer,direction_t newDir);
+	friend status_t leavingPath_old(tracer_t &tracer,direction_t newDir);
 	/*调试用函数，输出相关变量*/
 	__DEBUG void printNewSensorVal(void)const;
 	__DEBUG void printSensorVal(void)const;
@@ -109,7 +214,7 @@ public:
 
 /* Exported macro ------------------------------------------------------------*/
 
-extern tracer_t tracer[];
+extern tracer_t_new tracer[];
 
 #ifdef __cplusplus
 }
