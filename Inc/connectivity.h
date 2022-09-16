@@ -40,11 +40,11 @@ struct message_t{
 HAL_StatusTypeDef sendCommand(message_t &newCmd,const uint8_t argCount=argCountMax);
 /*运动指令*/
 void chassisMove(direction_t newDir=dirFront,uint8_t targetSpeed=speedLow);
-
+/*原地旋转指令*/
 void chassisRotate(direction_t newDir=dirRight,uint8_t targetSpeed=speedLow);
-
+/*行进中微调方向指令*/
 void chassisTrim(direction_t newDir=dirRight,uint8_t trimIntensity=1);
-
+/*停止运动指令*/
 void chassisStop(uint8_t stopIntensity=1);
 
 /* Private defines -----------------------------------------------------------*/
