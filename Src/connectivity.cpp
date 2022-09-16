@@ -66,6 +66,26 @@ void chassisStop(uint8_t stopIntensity){
 	sendCommand(newCmd,1);
 }
 
+status_t receiveCommand(message_t newMsg){
+	status_t flag=1;
+	switch (newMsg.command)
+	{
+	case errorCmd:
+		//errorCmd handler
+		flag=0;
+		break;
+	case detectCodeAns:
+		//检测到了正确的条形码，需要进行取壶操作
+		break;
+	default:
+		//unknown cmd handler
+		//其余指令本主机均不需要收到
+		flag=0;
+		break;
+	}
+	return flag;
+}
+
 /* Private functions definations ---------------------------------------------*/
 
 
