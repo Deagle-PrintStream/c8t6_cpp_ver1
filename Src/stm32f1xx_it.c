@@ -22,6 +22,8 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "callback.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -229,4 +231,23 @@ void USART1_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
+uint8_t period_100_count=0;
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /*
+    72MHz/(10000*72)=100Hz
+    frequence=100Hz
+    Period value=10000
+    interrupt interval=10ms	
+  */
+	if(htim==&htim3) //tim3 interrupt callback
+	{
+    period_100_count++;
+    tim3_callback();
+    if(period_100_count>=100){
+      period_100_count=0;
+      tim3_100period_callback();
+    }
+	}
+}
 /* USER CODE END 1 */

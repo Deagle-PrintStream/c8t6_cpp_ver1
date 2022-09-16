@@ -1,5 +1,7 @@
 
 #include "connectivity.h"
+#include "path.h"
+
 /* Exported macro ------------------------------------------------------------*/
 
 
@@ -18,6 +20,7 @@ HAL_StatusTypeDef sendCommand(message_t &newCmd,const uint8_t argCount){
 void chassisMove(direction_t newDir,uint8_t targetSpeed){
 	if(newDir==dirNowhere || newDir==dirAll)
 		return;
+	headingDir=newDir;
 
 	message_t newCmd;
 	newCmd.command=moveCmd;
@@ -27,6 +30,9 @@ void chassisMove(direction_t newDir,uint8_t targetSpeed){
 }
 
 void chassisRotate(direction_t newDir,uint8_t targetSpeed){
+	if(headingDir!=dirNowhere)
+		return;
+
 	if(newDir==dirRight || newDir==dirLeft){
 		message_t newCmd;
 		newCmd.command=rotateCmd;
@@ -37,6 +43,11 @@ void chassisRotate(direction_t newDir,uint8_t targetSpeed){
 }
 
 void chassisTrim(direction_t newDir,uint8_t trimIntensity){
+	if(headingDir==dirNowhere)
+		return;
+	if(onTrail==0)
+		return;
+
 	if(newDir==dirRight || newDir==dirLeft){
 		message_t newCmd;
 		newCmd.command=trimCmd;
@@ -47,10 +58,12 @@ void chassisTrim(direction_t newDir,uint8_t trimIntensity){
 }
 
 void chassisStop(uint8_t stopIntensity){
-		message_t newCmd;
-		newCmd.command=stopCmd;
-		newCmd.argList[0]=(uint8_t)(stopIntensity);
-		sendCommand(newCmd,1);
+	headingDir=dirNowhere;
+	
+	message_t newCmd;
+	newCmd.command=stopCmd;
+	newCmd.argList[0]=(uint8_t)(stopIntensity);
+	sendCommand(newCmd,1);
 }
 
 /* Private functions definations ---------------------------------------------*/

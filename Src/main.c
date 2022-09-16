@@ -24,6 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "common.h"
 
 /* USER CODE END Includes */
 
@@ -38,7 +39,6 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -76,7 +76,6 @@ int main(void)
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
-
   /* Configure the system clock */
   SystemClock_Config();
 
@@ -89,15 +88,24 @@ int main(void)
   MX_TIM3_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  while (tracerInit()!=1){
+    HAL_Delay(1);
+  }
+  
+  __HAL_UART_ENABLE_IT(&huart1,UART_IT_IDLE);
+  HAL_TIM_Base_Start_IT(&htim3);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	//HAL_GPIO_WritePin(PIN_SELECTOR_0_GPIO_Port,PIN_SELECTOR_0_Pin,GPIO_PIN_SET);
+	//HAL_GPIO_WritePin(PIN_SELECTOR_1_GPIO_Port,PIN_SELECTOR_1_Pin,GPIO_PIN_SET);
+
+	//turnRight();
+
   while (1)
   {
     /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -154,6 +162,7 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+  tracerDestrcut();
   __disable_irq();
   while (1)
   {

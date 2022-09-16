@@ -1,5 +1,8 @@
 
 #include "common.h"
+#include "tracer.h"
+#include "connectivity.h"
+#include "patrol.h"
 
 /* Exported macro ------------------------------------------------------------*/
 
@@ -9,7 +12,7 @@
 HAL_StatusTypeDef printMsg(uint8_t *newMsg,uint8_t msgSize,\
                 UART_HandleTypeDef printUart,uint32_t timeout){
     if(sizeof(newMsg)<msgSize)
-        msgSize=sizeof(newMsg);
+        msgSize=sizeof(newMsg)+1;
     return HAL_UART_Transmit(&printUart,newMsg,msgSize,timeout);
  }
 
@@ -29,6 +32,41 @@ void Delay_us(uint16_t us)
   SysTick->VAL = 0x00;
 }
 
+
+status_t tracerInit(void){
+  status_t flag=1;
+  tracerSelector.setCurrDir(dirFront);
+  patrol.switchMode(tracer_nsp::on);
+  patrol.setKeyNode(startLine);
+  for(uint8_t i=0;i<directionCount;i++){
+    tracer[i].clearData();
+    tracer[i].detectMode(tracer_nsp::on);
+    tracer[i].calcStatusMode(tracer_nsp::on);
+  }
+  return flag;
+}
+
+status_t tracerDestrcut(void){
+  tracerSelector.~selector_t();
+  patrol.~patrol_t();
+  for(uint8_t i=0;i<directionCount;i++){
+    tracer[i].~tracer_t_new();
+  }
+  return 1;
+}
+
+status_t turnRight(void){
+  chassisMove(dirFront,speedHigh);
+	WAIT_FOR(leavingPath(tracer[dirFront],dirFront),timeoutDefault);
+	chassisMove(dirFront,speedLow);
+	WAIT_FOR(detectNode(patrol,rightTurn),timeoutDefault);
+	chassisStop();
+	chassisRotate(dirRight);
+	WAIT_FOR(hittingPath(tracer[dirRight],dirRight),timeoutDefault);
+	chassisStop();
+	chassisMove(dirFront,speedHigh);
+  return 1;
+}
 
 
 /* Private functions definations ---------------------------------------------*/
