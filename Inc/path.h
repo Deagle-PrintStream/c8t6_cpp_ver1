@@ -3,6 +3,7 @@
 #define __PATH_H
 /* Private includes ----------------------------------------------------------*/
 #include "common.h"
+#include "patrol.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,6 +16,21 @@ extern "C" {
 /* Exported constants ------------------------------------------------------------*/
 
 /* Exported functions prototypes ---------------------------------------------*/
+
+status_t leaveStartLine(void);
+
+status_t makeTurn(direction_t newDir,plainNode_t newNode,uint32_t timeout);
+
+status_t turnRight(plainNode_t newNode,uint32_t timeout=timeoutDefault);
+
+status_t turnLeft(plainNode_t newNode,uint32_t timeout=timeoutDefault);
+
+status_t goThroughWasteLand(uint32_t timeout=timeoutDefault);
+
+status_t gotoBaseNode(keyNode_t preKeyNode,uint32_t timeout=timeoutDefault);
+
+/*测试寻径函数*/
+__DEBUG void testPath(void);
 
 /* Private defines -----------------------------------------------------------*/
 

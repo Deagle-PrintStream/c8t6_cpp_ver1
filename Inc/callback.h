@@ -9,6 +9,7 @@
 extern "C" {
 #endif
 	
+/* Exported functions prototypes ---------------------------------------------*/
 
 /*TIM3的中断响应函数*/
 extern void tim3_callback(void);

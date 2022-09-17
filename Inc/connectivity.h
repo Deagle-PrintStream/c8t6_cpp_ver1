@@ -11,7 +11,7 @@ extern "C" {
 static const uint8_t argCountMax=3;
 
 /* Exported types ------------------------------------------------------------*/
-
+/*指令类型*/
 enum command_t{
   errorCmd=0,
   moveCmd=1,
@@ -25,7 +25,7 @@ enum command_t{
   reservedCmd=9,
   testCmd=10,
 };
-
+/*通信结构体封装*/
 struct message_t{
   command_t command;
   uint8_t argList[argCountMax];
@@ -39,13 +39,15 @@ struct message_t{
 /*发送指令函数*/
 HAL_StatusTypeDef sendCommand(message_t &newCmd,const uint8_t argCount=argCountMax);
 /*运动指令*/
-void chassisMove(direction_t newDir=dirFront,uint8_t targetSpeed=speedLow);
+void chassisMoveCmd(direction_t newDir=dirFront,uint8_t targetSpeed=speedLow);
 /*原地旋转指令*/
-void chassisRotate(direction_t newDir=dirRight,uint8_t targetSpeed=speedLow);
+void chassisRotateCmd(direction_t newDir=dirRight,uint8_t targetSpeed=speedLow);
 /*行进中微调方向指令*/
-void chassisTrim(direction_t newDir=dirRight,uint8_t trimIntensity=1);
+void chassisTrimCmd(direction_t newDir=dirRight,uint8_t trimIntensity=1);
 /*停止运动指令*/
-void chassisStop(uint8_t stopIntensity=1);
+void chassisStopCmd(uint8_t stopIntensity=1);
+/*接收指令*/
+status_t receiveCommand(message_t newMsg);
 
 /* Private defines -----------------------------------------------------------*/
 

@@ -65,9 +65,9 @@ public:
 class patrol_t{
 private:
   /*当前平凡节点，即直线或者右转弯等*/
-	plainNode_t currPlainNode;
+	uint8_t currPlainNode;
   /*当前关键节点，如起跑线或者取壶点等*/
-	keyNode_t preKeyNode;
+	uint8_t preKeyNode;
   /*是否开启检测*/
 	status_t updateOn;
   /**/
@@ -87,8 +87,8 @@ public:
   /*强制设置关键检点类型*/
 	void setKeyNode(keyNode_t newKeyNode=startLine);
   /*检测到指定平凡节点*/
-    status_t detectPlainNode(plainNode_t newNode)const;
-    friend status_t detectNode(patrol_t &patrol,plainNode_t newNode);
+  status_t detectPlainNode(plainNode_t newNode)const;
+  friend status_t detectNode(patrol_t &patrol,plainNode_t newNode);
 
   /*从preNode出发向newNode行进，整合了各个部分的运动方向*/
 	void headingFor(keyNode_t newKeyNode,uint32_t timeout=timeoutMax)const;

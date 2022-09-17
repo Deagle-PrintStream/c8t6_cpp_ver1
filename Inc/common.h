@@ -15,11 +15,16 @@ static const uint32_t timeoutDefault=0x00ff;
 static const uint32_t timeoutMax=0x0ffffffff;
 static const uint16_t delayTime=0x05;
 
+static const uint8_t superCharge=200;
 static const uint8_t speedHigh=100;
 static const uint8_t speedLow=10;
 static const uint8_t directionCount=4;/*这个世界有四个方向*/
 
-
+/*预设各个阶段运动的大致时间，TODO:设定最大timeout,例如原地旋转90度的所需时间*/
+static const uint32_t wasteLandTime=16000;
+static const uint32_t rotateTime_90degree=1500;
+static const uint32_t rotateTime_180degree=2800;
+static const uint32_t decelerateTime=1000;
 
 /* Exported types ------------------------------------------------------------*/
 /*状态类型*/
@@ -71,6 +76,8 @@ extern HAL_StatusTypeDef printMsg(uint8_t *newMsg,uint8_t msgSize=msgSizeDefault
 /*延迟函数，实现微秒级别的延迟功能,或许需要一些修饰符，例如__STATIC_FORCEINLINE*/
 extern void Delay_us(uint16_t us);
 
+/*TODO:蜂鸣器叫一声函数*/
+extern void howlingWraiths(void);
 
 /*初始化包括tracer,selector,patrol等类对象*/
 extern status_t tracerInit(void);
