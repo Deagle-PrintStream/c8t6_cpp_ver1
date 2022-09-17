@@ -1,11 +1,12 @@
 
 #include "common.h"
 #include "tracer.h"
-#include "connectivity.h"
 #include "patrol.h"
+#include "path.h"
 
 /* Exported macro ------------------------------------------------------------*/
 
+/* Private functions definations ---------------------------------------------*/
 
 /* Exported functions definations ---------------------------------------------*/
 
@@ -55,20 +56,5 @@ status_t tracerDestrcut(void){
   return 1;
 }
 
-status_t turnRight(void){
-  chassisMove(dirFront,speedHigh);
-	WAIT_FOR(leavingPath(tracer[dirFront],dirFront),timeoutDefault);
-	chassisMove(dirFront,speedLow);
-	WAIT_FOR(detectNode(patrol,rightTurn),timeoutDefault);
-	chassisStop();
-	chassisRotate(dirRight);
-	WAIT_FOR(hittingPath(tracer[dirRight],dirRight),timeoutDefault);
-	chassisStop();
-	chassisMove(dirFront,speedHigh);
-  return 1;
-}
-
-
-/* Private functions definations ---------------------------------------------*/
 
 

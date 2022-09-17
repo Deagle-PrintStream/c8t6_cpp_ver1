@@ -153,11 +153,7 @@ void patrol_t::setKeyNode(keyNode_t newKeyNode){
 }
 
 status_t patrol_t::detectPlainNode(plainNode_t newNode)const{
-	if(currPlainNode==newNode){
-		return 1;
-	}else{
-		return 0;
-	}
+	return (currPlainNode==newNode);
 }
 
 status_t detectNode(patrol_t &patrol,plainNode_t newNode){

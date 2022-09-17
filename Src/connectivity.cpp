@@ -17,7 +17,7 @@ HAL_StatusTypeDef sendCommand(message_t &newCmd,const uint8_t argCount){
 	return HAL_UART_Transmit(&huart1,newMsg,argCount+2,timeoutDefault);
 }
 
-void chassisMove(direction_t newDir,uint8_t targetSpeed){
+void chassisMoveCmd(direction_t newDir,uint8_t targetSpeed){
 	if(newDir==dirNowhere || newDir==dirAll)
 		return;
 	headingDir=newDir;
@@ -29,7 +29,7 @@ void chassisMove(direction_t newDir,uint8_t targetSpeed){
 	sendCommand(newCmd,2);
 }
 
-void chassisRotate(direction_t newDir,uint8_t targetSpeed){
+void chassisRotateCmd(direction_t newDir,uint8_t targetSpeed){
 	if(headingDir!=dirNowhere)
 		return;
 
@@ -42,12 +42,12 @@ void chassisRotate(direction_t newDir,uint8_t targetSpeed){
 	}
 }
 
-void chassisTrim(direction_t newDir,uint8_t trimIntensity){
+void chassisTrimCmd(direction_t newDir,uint8_t trimIntensity){
 	if(headingDir==dirNowhere)
 		return;
 	if(onTrail==0)
 		return;
-
+	//根据前进方向的不同发送不同的trim指令，或者在从机那边接收TODO:
 	if(newDir==dirRight || newDir==dirLeft){
 		message_t newCmd;
 		newCmd.command=trimCmd;
@@ -57,7 +57,7 @@ void chassisTrim(direction_t newDir,uint8_t trimIntensity){
 	}
 }
 
-void chassisStop(uint8_t stopIntensity){
+void chassisStopCmd(uint8_t stopIntensity){
 	headingDir=dirNowhere;
 	
 	message_t newCmd;
@@ -70,18 +70,24 @@ status_t receiveCommand(message_t newMsg){
 	status_t flag=1;
 	switch (newMsg.command)
 	{
-	case errorCmd:
+	case errorCmd:{
 		//errorCmd handler
 		flag=0;
 		break;
-	case detectCodeAns:
+		}
+	case detectCodeAns:{
 		//检测到了正确的条形码，需要进行取壶操作
+		uint8_t newMsg[]="Code Detected\t";
+		printMsg(newMsg);
+
 		break;
-	default:
+		}
+	default:{
 		//unknown cmd handler
 		//其余指令本主机均不需要收到
 		flag=0;
 		break;
+		}
 	}
 	return flag;
 }

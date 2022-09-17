@@ -25,7 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "common.h"
-
+#include "path.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -98,10 +98,9 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	//HAL_GPIO_WritePin(PIN_SELECTOR_0_GPIO_Port,PIN_SELECTOR_0_Pin,GPIO_PIN_SET);
-	//HAL_GPIO_WritePin(PIN_SELECTOR_1_GPIO_Port,PIN_SELECTOR_1_Pin,GPIO_PIN_SET);
-
-	//turnRight();
+  testPath();
+  Error_Handler();
+	
 
   while (1)
   {
